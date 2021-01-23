@@ -30,16 +30,16 @@
       Mouse.release(MOUSE_LEFT);  // release the left button
     }
     
-    #ifdef USESERIAL
-      Serial.print(vertValue);
-      Serial.print(" ");
-      Serial.print(horzValue);
-      Serial.print(" ");
-      Serial.print((vertValue / sensitivity));
-      Serial.print(" ");
-      Serial.print(invertMouse * (horzValue / sensitivity));
-      Serial.println("");
-    #endif
+//    #ifdef USESERIAL
+//      Serial.print(vertValue);
+//      Serial.print(" ");
+//      Serial.print(horzValue);
+//      Serial.print(" ");
+//      Serial.print((vertValue / sensitivity));
+//      Serial.print(" ");
+//      Serial.print(invertMouse * (horzValue / sensitivity));
+//      Serial.println("");
+//    #endif
     }
     mouse_slow_down_counter++;
     
@@ -48,10 +48,10 @@
 
 
   void mouse_buttons_read(){
-    bool leftClickPressed = digitalRead(mouseLeftClickPin) == HIGH;
-    bool rightClickPressed = digitalRead(mouseRightClickPin) == HIGH;
-    bool middleClickPressed = digitalRead(mouseMiddleClickPin) == HIGH;
-    bool modClickPressed = digitalRead(mouseModPin) == HIGH;
+    bool leftClickPressed = digitalRead(mouseLeftClickPin) == LOW;
+    bool rightClickPressed = digitalRead(mouseRightClickPin) == LOW;
+    bool middleClickPressed = digitalRead(mouseMiddleClickPin) == LOW;
+    bool modClickPressed = digitalRead(mouseModPin) == LOW;
 
 
       if(leftClickPressed && !mouseLeftClickFlag){
