@@ -29,8 +29,8 @@ int mouseModPin = 5;
 int modLEDPin = 4;
 
 //config settings (change these to whatever you want)
-const int sensitivity = 20;  // Higher sensitivity value = slower mouse. Joystick sensitivity
-const int mouse_slow_down_counter_delay = 10; // this will read joystick every 10th loop as other wise it is too fast and inacurate. joystick still feels smooth.
+const int sensitivity = 10;  // Higher sensitivity value = slower mouse. Joystick sensitivity
+const int mouse_slow_down_counter_delay = 20; // this will read joystick every 20th loop as other wise it is too fast and inacurate. joystick still feels smooth.
 const int mouse_scroll_counter_delay = 20; //scroll speed. The higher the value the slower the scroll will be
 const int afk_clicker_counter_delay = 15; //increase to slow down the auto clicker. min=15 anything lower and system will freeze.
 const int led_counter_delay = 100; //How fast the led will blink when special mode is active. higher number = slower blink
