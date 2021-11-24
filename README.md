@@ -9,3 +9,7 @@ To see all features and a build/code guide go to my [website here](https://artio
 ![Custom mouse](/screens/21.jpg)
 
 ![Custom mouse](/screens/20.jpg)
+
+# (New) Extra mouse shaker mode
+1. button1: start mouse jitter
+2. button2: start keyboard afk
