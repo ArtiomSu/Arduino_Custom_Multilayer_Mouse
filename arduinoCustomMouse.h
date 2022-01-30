@@ -1,6 +1,5 @@
 #ifndef ARDUINOCUSTOMMOUSE
 #define ARDUINOCUSTOMMOUSE
-
 /* Joystick Setup
 
 GND   brown   GND
@@ -29,7 +28,8 @@ int mouseModPin = 5;
 int modLEDPin = 4;
 
 //config settings (change these to whatever you want)
-const int sensitivity = 10;  // Higher sensitivity value = slower mouse. Joystick sensitivity
+#define INITIAL_SENSITIVITY 25
+int sensitivity = INITIAL_SENSITIVITY; //10  // Higher sensitivity value = slower mouse. Joystick sensitivity
 const int mouse_slow_down_counter_delay = 20; // this will read joystick every 20th loop as other wise it is too fast and inacurate. joystick still feels smooth.
 const int mouse_scroll_counter_delay = 20; //scroll speed. The higher the value the slower the scroll will be
 const int afk_clicker_counter_delay = 15; //increase to slow down the auto clicker. min=15 anything lower and system will freeze.
@@ -46,19 +46,19 @@ int afk_clicker_counter = 0;
 int led_counter = 0;
 
 //button flags
-int mouseClickFlag = 0;
-int mouseLeftClickFlag = 0;
-int mouseRightClickFlag = 0;
-int mouseMiddleClickFlag = 0;
-int mouseModClickFlag = 0;
+bool mouseClickFlag = 0;
+bool mouseLeftClickFlag = 0;
+bool mouseRightClickFlag = 0;
+bool mouseMiddleClickFlag = 0;
+bool mouseModClickFlag = 0;
 
 //auto clicker
-int autoClickerHoldEnable = 0;
-int autoClickerAFKEnable = 0;
+bool autoClickerHoldEnable = 0;
+bool autoClickerAFKEnable = 0;
 
 //normal mode or special mode values;
 unsigned long lastTimeModClicked;
-int useSpecialMode = 0;
+bool useSpecialMode = 0;
 
 //int invertMouse = 1;        //Invert joystick based on orientation
 int invertMouse = -1;         //Noninverted joystick based on orientation
@@ -66,26 +66,26 @@ int invertMouse = -1;         //Noninverted joystick based on orientation
 
 //mouse shaker mode values bellow
 
-bool mouseShakerMode = false;
+bool mouseShakerMode = 0;
 
-int runLED = 0;
+bool runLED = 0;
 
 //button flags
-int joystickClickFlag = 0;
-int button1ClickFlag = 0;
-int button2ClickFlag = 0;
-int button3ClickFlag = 0;
-int button4ClickFlag = 0;
+bool joystickClickFlag = 0;
+bool button1ClickFlag = 0;
+bool button2ClickFlag = 0;
+bool button3ClickFlag = 0;
+bool button4ClickFlag = 0;
 
 //joystick button emulation flags
-int horizontal_forward_pressed_flag = 0;
-int horizontal_back_pressed_flag = 0;
-int vertical_down_pressed_flag = 0;
-int vertical_up_pressed_flag = 0;
+bool horizontal_forward_pressed_flag = 0;
+bool horizontal_back_pressed_flag = 0;
+bool vertical_down_pressed_flag = 0;
+bool vertical_up_pressed_flag = 0;
 
 struct MouseJitter
 {
-    int move_mouse = 0;
+    bool move_mouse = 0;
     int mouse_jitter_counter = 0;
     int mouse_jitter_delay_counter = 0;
     int mouse_jitter_random_x;
@@ -95,10 +95,10 @@ struct MouseJitter mouseJitter;
 
 struct KeyboardAfk
 {
-    int keyboard_move = 0;
+    bool keyboard_move = 0;
     int keyboard_counter = 0;
-    int keyboard_pressed = 0;
-    int keyboard_released = 1;
+    bool keyboard_pressed = 0;
+    bool keyboard_released = 1;
     int keyboard_pattern[5] = { 119, 97, 115, 100, 32 };
 };
 struct KeyboardAfk keyboardAfk;

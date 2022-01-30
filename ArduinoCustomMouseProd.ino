@@ -3,6 +3,7 @@
 #pragma message("building from ArduinoCustomMouseProd.ino")
 #pragma message("########################################")
 
+// #include "arduinoCustomMouse.h" // uncomment for vscode
 /*
   MOUSE SHAKER FUNCTIONS START
 */
@@ -133,208 +134,243 @@ void mouseShaker_buttons_read(){
  
 }
 
+void joystick_read_as_buttons(void hf_p(void), void hf_r(void),
+                               void hb_p(void), void hb_r(void),
+                               void vd_p(void), void vd_r(void),
+                               void vu_p(void), void vu_r(void),
+                               bool continuous_mode){
+  vertValue = analogRead(vertPin) - vertZero;  // read vertical offset
+  horzValue = analogRead(horzPin) - horzZero;  // read horizontal offset
+
+  int horizontal_forward_pressed = 0, horizontal_back_pressed = 0, vertical_down_pressed = 0, vertical_up_pressed = 0;
+
+  if      (horzValue > 500) { horizontal_forward_pressed = 1;
+  }else if(horzValue < -500){ horizontal_back_pressed = 1;
+  }else if(vertValue < -490){ vertical_down_pressed = 1;
+  }else if(vertValue > 500) { vertical_up_pressed = 1;
+  }
+
+  if(       horizontal_forward_pressed && (!horizontal_forward_pressed_flag || continuous_mode)){  horizontal_forward_pressed_flag = 1; hf_p();
+  }else if(!horizontal_forward_pressed && horizontal_forward_pressed_flag){   horizontal_forward_pressed_flag = 0; hf_r();
+  }
+
+  if(       horizontal_back_pressed && (!horizontal_back_pressed_flag || continuous_mode)){        horizontal_back_pressed_flag = 1; hb_p();
+  }else if(!horizontal_back_pressed && horizontal_back_pressed_flag){         horizontal_back_pressed_flag = 0; hb_r();
+  }
+
+  if(       vertical_down_pressed && (!vertical_down_pressed_flag || continuous_mode)){            vertical_down_pressed_flag = 1; vd_p();
+  }else if(!vertical_down_pressed && vertical_down_pressed_flag){             vertical_down_pressed_flag = 0; vd_r();
+  }
+
+  if(       vertical_up_pressed && (!vertical_up_pressed_flag || continuous_mode)){                vertical_up_pressed_flag = 1; vu_p();
+  }else if(!vertical_up_pressed && vertical_up_pressed_flag){                 vertical_up_pressed_flag = 0; vu_r();
+  }
+}
+
 void mouseShaker_joystick_read(){
-    vertValue = analogRead(vertPin) - vertZero;  // read vertical offset
-    horzValue = analogRead(horzPin) - horzZero;  // read horizontal offset
+  auto empty = [](void) -> void {};
+  auto led_50 = [](void) -> void { empty_button(50); };
+  auto led_100 = [](void) -> void { empty_button(100); };
+  auto led_150 = [](void) -> void { empty_button(150); };
+  auto led_200 = [](void) -> void { empty_button(200); };
 
-    int horizontal_forward_pressed = 0;
-    int horizontal_back_pressed = 0;
-    int vertical_down_pressed = 0;
-    int vertical_up_pressed = 0;
-    if(horzValue > 500){
-      horizontal_forward_pressed = 1;
-    }else if(horzValue < -500){
-      horizontal_back_pressed = 1;
-    }else if(vertValue < -490){
-      vertical_down_pressed = 1;
-    }else if(vertValue > 500){
-      vertical_up_pressed = 1;
-    }
-
-    if(horizontal_forward_pressed && !horizontal_forward_pressed_flag){
-      horizontal_forward_pressed_flag = 1;
-      empty_button(50);
-      //Keyboard.print("horizontal forward");
-    }else if(!horizontal_forward_pressed && horizontal_forward_pressed_flag){
-      horizontal_forward_pressed_flag = 0;
-    }
-
-    if(horizontal_back_pressed && !horizontal_back_pressed_flag){
-      horizontal_back_pressed_flag = 1;
-      empty_button(100);
-      //Keyboard.print("horizontal back");
-    }else if(!horizontal_back_pressed && horizontal_back_pressed_flag){
-      horizontal_back_pressed_flag = 0;
-    }
-
-    if(vertical_down_pressed && !vertical_down_pressed_flag){
-      vertical_down_pressed_flag = 1;
-      empty_button(150);
-      //Keyboard.print("vertical down");
-    }else if(!vertical_down_pressed && vertical_down_pressed_flag){
-      vertical_down_pressed_flag = 0;
-    }
-
-    if(vertical_up_pressed && !vertical_up_pressed_flag){
-      vertical_up_pressed_flag = 1;
-      empty_button(200);
-      //Keyboard.print("vertical up");
-    }else if(!vertical_up_pressed && vertical_up_pressed_flag){
-      vertical_up_pressed_flag = 0;
-    }
+  joystick_read_as_buttons(
+    led_50, empty,
+    led_100, empty,
+    led_150, empty,
+    led_200, empty,
+    false
+  );
 }
 
 /*
   MOUSE SHAKER FUNCTIONS END
 */
 
+void modHeldMode_joystick_read(){
+  auto empty = [](void) -> void {};
+  auto scroll_up = [](void) -> void { 
+    if(mouse_scroll_counter == 0){
+        Mouse.move(0, 0, 1);
+    }
+  };
+  auto scroll_down = [](void) -> void { 
+    if(mouse_scroll_counter == 0){
+        Mouse.move(0, 0, -1);
+    }
+  };
+
+  joystick_read_as_buttons(
+    scroll_up, empty,
+    scroll_down, empty,
+    empty, empty,
+    empty, empty,
+    true
+  );
+
+  mouse_scroll_counter++;
+  if(mouse_scroll_counter > mouse_scroll_counter_delay){
+    mouse_scroll_counter = 0;
+  }
+}
+
 void joystick_read(){
 
-    if ((digitalRead(selPin) == 0) && (!mouseClickFlag))  // if the joystick button is pressed
-    {
-      mouseClickFlag = 1;
-      mouseShakerMode = !mouseShakerMode;
-    }
-    else if ((digitalRead(selPin)) && (mouseClickFlag)) // if the joystick button is not pressed
-    {
-      mouseClickFlag = 0;
-    }
+  if ((digitalRead(selPin) == 0) && (!mouseClickFlag))  // if the joystick button is pressed
+  {
+    mouseClickFlag = 1;
+    mouseShakerMode = !mouseShakerMode;
+  }
+  else if ((digitalRead(selPin)) && (mouseClickFlag)) // if the joystick button is not pressed
+  {
+    mouseClickFlag = 0;
+  }
 
 
-    if(mouseShakerMode){
-      mouseShaker_joystick_read();
-      return;
-    }
+  if(mouseShakerMode){
+    mouseShaker_joystick_read();
+    return;
+  }
 
-    if(mouse_slow_down_counter > mouse_slow_down_counter_delay){
-    mouse_slow_down_counter = 0;
-    vertValue = analogRead(vertPin) - vertZero;  // read vertical offset
-    horzValue = analogRead(horzPin) - horzZero;  // read horizontal offset
+  if(mouseModClickFlag){
+    modHeldMode_joystick_read();
+    return;
+  }
+
+  if(mouse_slow_down_counter > mouse_slow_down_counter_delay){
+  mouse_slow_down_counter = 0;
+  vertValue = analogRead(vertPin) - vertZero;  // read vertical offset
+  horzValue = analogRead(horzPin) - horzZero;  // read horizontal offset
 
 
-    //use this for scrolling also maybe when mod key is pressed down
-    if (vertValue != 0)
-      //Mouse.move(0, (invertMouse * (vertValue / sensitivity)), 0); // move mouse on y axis
-      Mouse.move(((vertValue / sensitivity)), 0, 0);
-    if (horzValue != 0)
-      //Mouse.move((invertMouse * (horzValue / sensitivity)), 0, 0); // move mouse on x axis
-      Mouse.move(0, (invertMouse * (horzValue / sensitivity)), 0); // move mouse on y axis
-    // if ((digitalRead(selPin) == 0) && (!mouseClickFlag))  // if the joystick button is pressed
-    // {
-    //   mouseClickFlag = 1;
-    //   autoClickerHoldEnable = 0;
-    //   autoClickerAFKEnable = 0;
-    //   useSpecialMode = 0;
-    // }
-    // else if ((digitalRead(selPin)) && (mouseClickFlag)) // if the joystick button is not pressed
-    // {
-    //   mouseClickFlag = 0;
-    // }
-    
-    }
-    mouse_slow_down_counter++;
+  //use this for scrolling also maybe when mod key is pressed down
+  if (vertValue != 0)
+    //Mouse.move(0, (invertMouse * (vertValue / sensitivity)), 0); // move mouse on y axis
+    Mouse.move(((vertValue / sensitivity)), 0, 0);
+  if (horzValue != 0)
+    //Mouse.move((invertMouse * (horzValue / sensitivity)), 0, 0); // move mouse on x axis
+    Mouse.move(0, (invertMouse * (horzValue / sensitivity)), 0); // move mouse on y axis
+  // if ((digitalRead(selPin) == 0) && (!mouseClickFlag))  // if the joystick button is pressed
+  // {
+  //   mouseClickFlag = 1;
+  //   autoClickerHoldEnable = 0;
+  //   autoClickerAFKEnable = 0;
+  //   useSpecialMode = 0;
+  // }
+  // else if ((digitalRead(selPin)) && (mouseClickFlag)) // if the joystick button is not pressed
+  // {
+  //   mouseClickFlag = 0;
+  // }
+  
+  }
+  mouse_slow_down_counter++;
 }
 
 void mod_key_held_down(bool leftClickPressed, bool rightClickPressed, bool middleClickPressed){
   if(leftClickPressed && !mouseLeftClickFlag){
+    mouseLeftClickFlag = 1;
+    Mouse.press(MOUSE_PREV);
+  }else if(!leftClickPressed && mouseLeftClickFlag){
+    mouseLeftClickFlag = 0;
+    Mouse.release(MOUSE_PREV);
+  }
+
+  if(rightClickPressed && !mouseRightClickFlag){
+    mouseRightClickFlag = 1;
+    Mouse.press(MOUSE_NEXT);
+  }else if(!rightClickPressed && mouseRightClickFlag){
+    mouseRightClickFlag = 0;
+    Mouse.release(MOUSE_NEXT);
+  }
+
+  if(middleClickPressed && !mouseMiddleClickFlag){
+    mouseMiddleClickFlag = 1;
+    autoClickerHoldEnable = !autoClickerHoldEnable;
+  }else if(!middleClickPressed && mouseMiddleClickFlag){
+    mouseMiddleClickFlag = 0;
+  }
+}
+
+void normal_mode(bool leftClickPressed, bool rightClickPressed, bool middleClickPressed){
+  if(autoClickerHoldEnable){
+    if(afk_clicker_counter == 0){
+      if(leftClickPressed){
+        Mouse.click(MOUSE_LEFT);
+      }
+
+      if(rightClickPressed){
+        Mouse.click(MOUSE_RIGHT);
+      }
+
+      if(middleClickPressed){
+        Mouse.click(MOUSE_MIDDLE);
+      }        
+      
+    }
+  }else{
+    if(leftClickPressed && !mouseLeftClickFlag){
       mouseLeftClickFlag = 1;
-      Mouse.press(MOUSE_PREV);
+      Mouse.press(MOUSE_LEFT);
     }else if(!leftClickPressed && mouseLeftClickFlag){
       mouseLeftClickFlag = 0;
-      Mouse.release(MOUSE_PREV);
+      Mouse.release(MOUSE_LEFT);
     }
 
     if(rightClickPressed && !mouseRightClickFlag){
       mouseRightClickFlag = 1;
-      Mouse.press(MOUSE_NEXT);
+      Mouse.press(MOUSE_RIGHT);
     }else if(!rightClickPressed && mouseRightClickFlag){
       mouseRightClickFlag = 0;
-      Mouse.release(MOUSE_NEXT);
+      Mouse.release(MOUSE_RIGHT);
     }
 
     if(middleClickPressed && !mouseMiddleClickFlag){
       mouseMiddleClickFlag = 1;
-      autoClickerHoldEnable = !autoClickerHoldEnable;
+      Mouse.press(MOUSE_MIDDLE);
     }else if(!middleClickPressed && mouseMiddleClickFlag){
       mouseMiddleClickFlag = 0;
+      Mouse.release(MOUSE_MIDDLE);
     }
-}
-
-void normal_mode(bool leftClickPressed, bool rightClickPressed, bool middleClickPressed){
-    if(autoClickerHoldEnable){
-      if(afk_clicker_counter == 0){
-        if(leftClickPressed){
-          Mouse.click(MOUSE_LEFT);
-        }
-
-        if(rightClickPressed){
-          Mouse.click(MOUSE_RIGHT);
-        }
-
-        if(middleClickPressed){
-          Mouse.click(MOUSE_MIDDLE);
-        }        
-        
-      }
-    }else{
-      if(leftClickPressed && !mouseLeftClickFlag){
-        mouseLeftClickFlag = 1;
-        Mouse.press(MOUSE_LEFT);
-      }else if(!leftClickPressed && mouseLeftClickFlag){
-        mouseLeftClickFlag = 0;
-        Mouse.release(MOUSE_LEFT);
-      }
-
-      if(rightClickPressed && !mouseRightClickFlag){
-        mouseRightClickFlag = 1;
-        Mouse.press(MOUSE_RIGHT);
-      }else if(!rightClickPressed && mouseRightClickFlag){
-        mouseRightClickFlag = 0;
-        Mouse.release(MOUSE_RIGHT);
-      }
-  
-      if(middleClickPressed && !mouseMiddleClickFlag){
-        mouseMiddleClickFlag = 1;
-        Mouse.press(MOUSE_MIDDLE);
-      }else if(!middleClickPressed && mouseMiddleClickFlag){
-        mouseMiddleClickFlag = 0;
-        Mouse.release(MOUSE_MIDDLE);
-      }
-      
-    }
-    
-
+  }
 }
 
 void special_mode(bool leftClickPressed, bool rightClickPressed, bool middleClickPressed){
-    if(leftClickPressed && (mouse_scroll_counter == 0)){
-        mouseLeftClickFlag = 1;
-        Mouse.move(0, 0, 1);
-      }else if(!leftClickPressed && mouseLeftClickFlag){
-        mouseLeftClickFlag = 0;
-        //Mouse.release(MOUSE_LEFT);
+
+  if(leftClickPressed && !mouseLeftClickFlag){
+    mouseLeftClickFlag = 1;
+    if(sensitivity > 5){
+      sensitivity--;
+    }
+    if(sensitivity > 10){
+      sensitivity-=3;
+    }
+  }else if(!leftClickPressed && mouseLeftClickFlag){
+    mouseLeftClickFlag = 0;
+  }
+  
+  if(rightClickPressed && !mouseRightClickFlag){
+    mouseRightClickFlag = 1;
+    if(sensitivity < 40){
+      sensitivity++;
+      if(sensitivity > 10){
+        sensitivity+=3;
       }
-    
-    
-    if(rightClickPressed && (mouse_scroll_counter == 0)){
-      mouseRightClickFlag = 1;
-      Mouse.move(0, 0, -1);     
-    }else if(!rightClickPressed && mouseRightClickFlag){
-      mouseRightClickFlag = 0;
-      //Mouse.release(MOUSE_RIGHT);
     }
+  }else if(!rightClickPressed && mouseRightClickFlag){
+    mouseRightClickFlag = 0;
+  }
 
-    if(middleClickPressed && !mouseMiddleClickFlag){
-      mouseMiddleClickFlag = 1;
-      autoClickerAFKEnable = !autoClickerAFKEnable;
-    }else if(!middleClickPressed && mouseMiddleClickFlag){
-      mouseMiddleClickFlag = 0;
-    }
+  if(middleClickPressed && !mouseMiddleClickFlag){
+    mouseMiddleClickFlag = 1;
+    autoClickerAFKEnable = !autoClickerAFKEnable;
+  }else if(!middleClickPressed && mouseMiddleClickFlag){
+    mouseMiddleClickFlag = 0;
+  }
 
-    mouse_scroll_counter++;
-    if(mouse_scroll_counter > mouse_scroll_counter_delay){
-      mouse_scroll_counter = 0;
-    }
+  mouse_scroll_counter++;
+  if(mouse_scroll_counter > mouse_scroll_counter_delay){
+    mouse_scroll_counter = 0;
+  }
 }
 
 

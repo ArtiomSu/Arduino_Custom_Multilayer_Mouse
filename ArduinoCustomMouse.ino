@@ -4,33 +4,7 @@
 //#define TESTING //Comment out to compile the prod code
 //#define USESERIAL //comment out to get rid of serial
 
-
-
-/*
- There are 3 different modes currently
- 1. normal 
- 2. shifted : this is when the mode key is held down
- 3. speacial: this is when the mode key is pressed
-
-  NORMAL MODE
-  btn 1: left click
-  btn 2: right click
-  btn 3: middle click
-  btn 4: press=mode shifted, hold=mode special
-
-  SHIFTED MODE
-  btn 1: browser back
-  btn 2: browser forword
-  btn 3: toggle autoclicker that fires off when you hold either left, right or middle buttons
-
-  #SPECIAL MODE
-  btn 1: scroll up
-  btn 2: scroll down
-  btn 3: autoclicker afk toggle will keep clicking left click
-
-  clicking on the joystick will reset everything to default turning off auto clickers and so on..
- 
-*/
+// See README.md for Layout
 
 /* Consumer codes in ~/Arduino/libraries/HID-Project/src/HID-APIs/ConsumerAPI.h
 HID_CONSUMER_AC_SCROLL_UP = 0x233
